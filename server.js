@@ -24,6 +24,7 @@ app.get('/', (req, res) => {
 
 // API để xử lý yêu cầu POST từ form
 app.post('/submit-form', (req, res) => {
+    console.log('Received form submission:', req.body);
     const { name, phone, email, pet, otherType, services, homeService, pickUpService, address, message } = req.body;
     
     // Tạo ID duy nhất cho mỗi khách hàng và thêm ngày gửi yêu cầu
