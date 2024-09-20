@@ -24,7 +24,6 @@ app.get('/', (req, res) => {
 
 // API để xử lý yêu cầu POST từ form
 app.post('/submit-form', (req, res) => {
-    console.log('Received form submission:', req.body);
     const { name, phone, email, pet, otherType, services, homeService, pickUpService, address, message } = req.body;
     
     // Tạo ID duy nhất cho mỗi khách hàng và thêm ngày gửi yêu cầu
@@ -41,48 +40,34 @@ app.post('/submit-form', (req, res) => {
 
     // Đọc dữ liệu hiện tại từ file customers.json
     fs.readFile('customers.json', 'utf8', (err, data) => {
-        if (err && err.code === 'ENOENT') {
-            console.log('File not found. Creating a new file...');
-            let customers = [];
-            customers.push(customerData);
-
-            // Ghi dữ liệu mới vào file
-            fs.writeFile('customers.json', JSON.stringify(customers, null, 2), (err) => {
-                if (err) {
-                    console.error('Error writing file:', err);
-                    return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi ghi dữ liệu!" });
-                }
-                return res.json({ success: true, message: "Dữ liệu đã được gửi và lưu thành công!" });
-            });
-        } else if (!err) {
-            try {
-                let customers = JSON.parse(data);
-                customers.push(customerData);
-
-                fs.writeFile('customers.json', JSON.stringify(customers, null, 2), (err) => {
-                    if (err) {
-                        console.error('Error writing file:', err);
-                        return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi ghi dữ liệu!" });
-                    }
-                    return res.json({ success: true, message: "Dữ liệu đã được cập nhật thành công!" });
-                });
-            } catch (parseError) {
-                console.error('Error parsing JSON file:', parseError);
-                let customers = [];
-                customers.push(customerData);
-
-                fs.writeFile('customers.json', JSON.stringify(customers, null, 2), (err) => {
-                    if (err) {
-                        console.error('Error writing file:', err);
-                        return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi khởi tạo lại dữ liệu!" });
-                    }
-                    return res.json({ success: true, message: "Dữ liệu đã được khởi tạo lại và lưu thành công!" });
-                });
+        let customers = [];
+        if (err) {
+            if (err.code === 'ENOENT') {
+                console.log('File not found. Creating a new file...');
+            } else {
+                console.error('Error reading file:', err);
+                return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi đọc dữ liệu!" });
             }
         } else {
-            console.error('Error reading file:', err);
-            return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi đọc dữ liệu!" });
+            try {
+                customers = JSON.parse(data); // Chuyển đổi từ chuỗi JSON sang đối tượng
+            } catch (parseError) {
+                console.error('Error parsing JSON file:', parseError);
+                return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi phân tích dữ liệu!" });
+            }
         }
+
+        // Thêm dữ liệu mới vào mảng
+        customers.push(customerData);
+
+        // Ghi dữ liệu mới vào file customers.json
+        fs.writeFile('customers.json', JSON.stringify(customers, null, 2), (err) => {
+            if (err) {
+                console.error('Error writing file:', err);
+                return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi ghi dữ liệu!" });
+            }
+            return res.json({ success: true, message: "Dữ liệu đã được gửi và lưu thành công!" });
+        });
     });
 });
 
