@@ -1,8 +1,8 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     const nav = document.querySelector('header');
     
     // Thay đổi màu sắc của thanh điều hướng khi cuộn trang
-    window.addEventListener('scroll', function() {
+    window.addEventListener('scroll', function () {
         if (window.scrollY > 50) {
             nav.style.backgroundColor = '#007bbd'; // Thay đổi màu sắc khi cuộn trang
             nav.style.boxShadow = '0 4px 8px rgba(0, 0, 0, 0.1)';
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const petSelect = document.getElementById('pet');
     const otherPetType = document.getElementById('otherPetType');
 
-    petSelect.addEventListener('change', function() {
+    petSelect.addEventListener('change', function () {
         if (petSelect.value === 'others') {
             otherPetType.style.display = 'block';
         } else {
@@ -42,7 +42,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Form submission
     const form = document.getElementById('serviceForm');
-    form.addEventListener('submit', function(event) {
+    form.addEventListener('submit', function (event) {
         event.preventDefault();
 
         const formData = {
@@ -58,19 +58,37 @@ document.addEventListener('DOMContentLoaded', function() {
             message: document.getElementById('message').value
         };
 
-        // Gửi dữ liệu tới server (đây chỉ là demo)
-        console.log('Submitted form data:', formData);
-
-        // Hiển thị thông báo thành công
-        const responseMessage = document.getElementById('responseMessage');
-        responseMessage.textContent = 'Đã gửi thông tin thành công!';
-        responseMessage.style.display = 'block';
-        responseMessage.style.color = 'green';
+        // Gửi dữ liệu tới server
+        fetch('/submit-form', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(formData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Hiển thị thông báo thành công hoặc lỗi
+            const responseMessage = document.getElementById('responseMessage');
+            if (data.success) {
+                responseMessage.textContent = 'Đã gửi thông tin thành công!';
+                responseMessage.style.color = 'green';
+            } else {
+                responseMessage.textContent = 'Có lỗi xảy ra khi gửi thông tin!';
+                responseMessage.style.color = 'red';
+            }
+            responseMessage.style.display = 'block';
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const responseMessage = document.getElementById('responseMessage');
+            responseMessage.textContent = 'Có lỗi xảy ra khi gửi thông tin!';
+            responseMessage.style.color = 'red';
+            responseMessage.style.display = 'block';
+        });
 
         // Reset form sau khi gửi
         form.reset();
-
-        // Ẩn trường địa chỉ và loại thú cưng khác khi reset form
         addressField.style.display = 'none';
         otherPetType.style.display = 'none';
     });
